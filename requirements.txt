@@ -1,0 +1,4 @@
+httpx
+certifi
+beautifulsoup4
+lxml
