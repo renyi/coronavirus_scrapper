@@ -5,7 +5,7 @@ import aiofile
 
 from datetime import datetime
 
-from db import write_db
+from .db import write_db
 
 logger = logging.getLogger("scrapper")
 

@@ -12,12 +12,9 @@ from datetime import datetime
 from dateutil.parser import parse
 from pyjsparser import parse as parse_js
 
-if __name__ == "__main__":
-    from base import Scapper
-    from config import HTML_PARSER, KEYWORDS, DEFAULT_HEADERS, PROXIES
-else:
-    from .base import Scapper
-    from .config import HTML_PARSER, KEYWORDS, DEFAULT_HEADERS, PROXIES
+from .settings import TOUTIAO_PAGE
+from .base import Scapper
+from .config import HTML_PARSER, KEYWORDS, DEFAULT_HEADERS, PROXIES
 
 logger = logging.getLogger("scrapper")
 
@@ -28,7 +25,6 @@ class ToutiaoScrapper(Scapper, abc.ABC):
     root = "https://m.toutiao.com/"
     endpoint = "https://www.toutiao.com/c/user/article/"
     timeout: int = 15
-    max_crawl = 10  # Infinite pagination
 
     user_id = None
     author = None
@@ -196,7 +192,7 @@ class ToutiaoScrapper(Scapper, abc.ABC):
                 crawl += 1
                 logger.debug(f"{self}: crawl: {crawl}")
 
-                if crawl > self.max_crawl:
+                if crawl > TOUTIAO_PAGE:
                     break
 
                 await asyncio.sleep(1)
@@ -207,8 +203,8 @@ class ToutiaoScrapper(Scapper, abc.ABC):
 
 class CgtnToutiaoScrapper(ToutiaoScrapper):
     user_id = "82615367134"  # toutiao userid
-    author = "CGTN"
-    site_name = ""
+    author = ""
+    site_name = "CGTN Toutiao"
     client = httpx.AsyncClient(headers=DEFAULT_HEADERS, proxies=PROXIES)
 
 
@@ -280,16 +276,3 @@ class PeopleDailyOverseasToutiaoScrapper(ToutiaoScrapper):
     author = ""
     site_name = "People's Daily Overseas Website Toutiao"
     client = httpx.AsyncClient(headers=DEFAULT_HEADERS, proxies=PROXIES)
-
-
-cgtntoutiao_scrapper = CgtnToutiaoScrapper()
-cctv4toutiao_scrapper = Cctv4ToutiaoScrapper()
-cctvtoutiao_scrapper = CctvToutiaoScrapper()
-cctvquicktoutiao_scrapper = CctvQuickToutiaoScrapper()
-chinadailytoutiao_scrapper = ChinaDailyToutiaoScrapper()
-chinayouthtoutiao_scrapper = ChinaYouthToutiaoScrapper()
-beijingnewstoutiao_scrapper = BeijingNewsToutiaoScrapper()
-economicdailytoutiao_scrapper = EconomicDailyToutiaoScrapper()
-chinanewstoutiao_scrapper = ChinaNewsToutiaoScrapper()
-peopledailytoutiao_scrapper = PeopleDailyToutiaoScrapper()
-peopledailyoverseastoutiao_scrapper = PeopleDailyOverseasToutiaoScrapper()

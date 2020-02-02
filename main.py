@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
+import sys
 import asyncio
 import uvloop
 import logging
+
+import bots.settings
+import bots.toutiao
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -21,37 +25,46 @@ f_handler.setFormatter(f_format)
 logger.addHandler(f_handler)
 
 
-async def main():
-    from bots.toutiao import (
-        cgtntoutiao_scrapper,
-        cctv4toutiao_scrapper,
-        cctvtoutiao_scrapper,
-        cctvquicktoutiao_scrapper,
-        chinadailytoutiao_scrapper,
-        chinayouthtoutiao_scrapper,
-        beijingnewstoutiao_scrapper,
-        economicdailytoutiao_scrapper,
-        chinanewstoutiao_scrapper,
-        peopledailytoutiao_scrapper,
-        peopledailyoverseastoutiao_scrapper,
-    )
+def import_string(import_name, silent=False):
+    """Imports an object based on a string.  This is useful if you want to
+    use import paths as endpoints or something similar.  An import path can
+    be specified either in dotted notation (``xml.sax.saxutils.escape``)
+    or with a colon as object delimiter (``xml.sax.saxutils:escape``).
+    If `silent` is True the return value will be `None` if the import fails.
+    :param import_name: the dotted name for the object to import.
+    :param silent: if set to `True` import errors are ignored and
+                   `None` is returned instead.
+    :return: imported object
+    """
+    # force the import name to automatically convert to strings
+    # __import__ is not able to handle unicode strings in the fromlist
+    # if the module is a package
+    import_name = str(import_name).replace(":", ".")
+    try:
+        __import__(import_name)
+    except ImportError:
+        if "." not in import_name:
+            raise
+    else:
+        return sys.modules[import_name]
 
-    await asyncio.gather(
-        cgtntoutiao_scrapper.run(),
-        cctv4toutiao_scrapper.run(),
-        cctvtoutiao_scrapper.run(),
-        cctvquicktoutiao_scrapper.run(),
-        chinadailytoutiao_scrapper.run(),
-        chinayouthtoutiao_scrapper.run(),
-        beijingnewstoutiao_scrapper.run(),
-        economicdailytoutiao_scrapper.run(),
-        chinanewstoutiao_scrapper.run(),
-        peopledailytoutiao_scrapper.run(),
-        peopledailyoverseastoutiao_scrapper.run(),
-    )
+    module_name, obj_name = import_name.rsplit(".", 1)
+    module = __import__(module_name, globals(), locals(), [obj_name])
+    try:
+        return getattr(module, obj_name)
+    except AttributeError as e:
+        raise ImportError(e)
+
+
+async def main():
+    task_list = [import_string(b) for b in bots.settings.BOTS]
+
+    await asyncio.gather(*[T().run() for T in task_list])
 
 
 if __name__ == "__main__":
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(
+        logging.DEBUG if bots.settings.DEBUG is True else logging.INFO
+    )
 
     asyncio.run(main())

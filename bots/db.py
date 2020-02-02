@@ -1,7 +1,8 @@
 import aiomysql
 import asyncio
 import logging
-import settings
+
+import bots.settings
 
 pool = None
 
@@ -15,11 +16,11 @@ async def get_dbpool():
 
     if pool is None:
         pool = await aiomysql.create_pool(
-            host=settings.DB_HOST,
-            port=settings.DB_PORT,
-            user=settings.DB_USER,
-            password=settings.DB_PASSWORD,
-            db=settings.DB,
+            host=bots.settings.DB_HOST,
+            port=bots.settings.DB_PORT,
+            user=bots.settings.DB_USER,
+            password=bots.settings.DB_PASSWORD,
+            db=bots.settings.DB,
             loop=loop,
             autocommit=False,
         )
@@ -37,7 +38,7 @@ async def write_db(data_list: list, commit: bool = False):
                 columns = ",".join(data.keys())
                 values = ",".join(["%s" for v in data.values()])
 
-                stmt1 = f"INSERT INTO `{settings.NEWSAPI_TABLE}` ({columns}) VALUES ({values})"
+                stmt1 = f"INSERT INTO `{bots.settings.NEWSAPI_TABLE}` ({columns}) VALUES ({values})"
                 stmt2 = f"ON DUPLICATE KEY UPDATE siteName='{data['siteName']}', author='{data['author']}', publishedAt='{data['publishedAt']}', addedOn='{data['addedOn']}'"
 
                 stmt = f"{stmt1} {stmt2}"
