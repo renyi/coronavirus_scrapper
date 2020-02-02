@@ -12,9 +12,15 @@ from datetime import datetime
 from dateutil.parser import parse
 from pyjsparser import parse as parse_js
 
-from .settings import TOUTIAO_PAGE
+from scrapper.settings import (
+    HTML_PARSER,
+    KEYWORDS,
+    DEFAULT_HEADERS,
+    PROXIES,
+    TOUTIAO_PAGE,
+)
+
 from .base import Scapper
-from .config import HTML_PARSER, KEYWORDS, DEFAULT_HEADERS, PROXIES
 
 logger = logging.getLogger("scrapper")
 

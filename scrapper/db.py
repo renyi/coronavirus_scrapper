@@ -2,7 +2,7 @@ import aiomysql
 import asyncio
 import logging
 
-import bots.settings
+import scrapper.settings
 
 pool = None
 
@@ -16,11 +16,11 @@ async def get_dbpool():
 
     if pool is None:
         pool = await aiomysql.create_pool(
-            host=bots.settings.DB_HOST,
-            port=bots.settings.DB_PORT,
-            user=bots.settings.DB_USER,
-            password=bots.settings.DB_PASSWORD,
-            db=bots.settings.DB,
+            host=scrapper.settings.DB_HOST,
+            port=scrapper.settings.DB_PORT,
+            user=scrapper.settings.DB_USER,
+            password=scrapper.settings.DB_PASSWORD,
+            db=scrapper.settings.DB,
             loop=loop,
             autocommit=False,
         )
@@ -38,7 +38,7 @@ async def write_db(data_list: list, commit: bool = False):
                 columns = ",".join(data.keys())
                 values = ",".join(["%s" for v in data.values()])
 
-                stmt1 = f"INSERT INTO `{bots.settings.NEWSAPI_TABLE}` ({columns}) VALUES ({values})"
+                stmt1 = f"INSERT INTO `{scrapper.settings.NEWSAPI_TABLE}` ({columns}) VALUES ({values})"
                 stmt2 = f"ON DUPLICATE KEY UPDATE siteName='{data['siteName']}', author='{data['author']}', publishedAt='{data['publishedAt']}', addedOn='{data['addedOn']}'"
 
                 stmt = f"{stmt1} {stmt2}"
