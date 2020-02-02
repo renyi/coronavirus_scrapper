@@ -3,3 +3,4 @@
 *.html
 *.venv/
 *.log
+/.env

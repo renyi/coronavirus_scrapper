@@ -23,10 +23,6 @@ logger = logging.getLogger("scrapper")
 
 
 class ToutiaoScrapper(Scapper, abc.ABC):
-    __author__ = "Renyi Khor"
-    __email__ = "renyi.ace@gmail.com"
-    __copyright__ = "Copyright 2020, The Coronavirus Tracker Scrapper (Toutiao)"
-
     site_name = "Toutiao"
 
     root = "https://m.toutiao.com/"
