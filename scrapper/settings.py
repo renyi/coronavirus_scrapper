@@ -25,6 +25,8 @@ NEWSAPI_TABLE = os.getenv("NEWSAPI_TABLE")
 
 DEBUG = False
 
+OFFLINE_MODE = False
+
 KEYWORDS = (
     "冠状病毒",
     "武汉冠状病毒",
@@ -59,4 +61,4 @@ BOTS = (
     "scrapper.bots.toutiao.PeopleDailyOverseasToutiaoScrapper",
 )
 
-TOUTIAO_PAGE = 10
+TOUTIAO_PAGE = 5

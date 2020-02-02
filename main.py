@@ -4,6 +4,7 @@
 import asyncio
 import uvloop
 import logging
+import logging.handlers
 
 import scrapper.settings
 import scrapper.utils
@@ -18,7 +19,10 @@ c_format = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
 c_handler.setFormatter(c_format)
 logger.addHandler(c_handler)
 
-f_handler = logging.FileHandler("logs/scappers.log")
+# f_handler = logging.FileHandler("logs/scappers.log")
+f_handler = logging.handlers.TimedRotatingFileHandler(
+    "logs/scappers.log", backupCount=10, when="D"
+)
 f_handler.setLevel(logging.INFO)
 f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 f_handler.setFormatter(f_format)

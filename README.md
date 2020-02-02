@@ -1,6 +1,6 @@
 # Overview
 
-The Coronavirus Tracker Scrapper
+The Coronavirus Tracker Scrapper.
 
 ## Requirements
 
@@ -33,7 +33,6 @@ This project requires Python 3.
     DB_USER = ""
     DB_PASSWORD = ""
     NEWSAPI_TABLE = ""
-
 
 ### 4. Start scrapping.
     $ python main.py

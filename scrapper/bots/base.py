@@ -38,8 +38,9 @@ class Scapper(abc.ABC):
 
             logger.debug(f"Saving {filename}")
 
-            async with aiofile.AIOFile(f"/data/{filename}", "w+") as afp:
-                await afp.write(orjson.dumps(data))
+            async with aiofile.AIOFile(f"data/{filename}", "w+") as afp:
+                data = orjson.dumps(data)
+                await afp.write(data.decode("utf-8"))
                 await afp.fsync()
 
             logger.debug(f"Saved.")

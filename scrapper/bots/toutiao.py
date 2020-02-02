@@ -18,6 +18,7 @@ from scrapper.settings import (
     DEFAULT_HEADERS,
     PROXIES,
     TOUTIAO_PAGE,
+    OFFLINE_MODE,
 )
 
 from .base import Scapper
@@ -203,8 +204,17 @@ class ToutiaoScrapper(Scapper, abc.ABC):
 
                 await asyncio.sleep(1)
 
-        await self.save_db()
-        # await self.save_file()
+        if OFFLINE_MODE is True:
+            try:
+                await self.save_file()
+            except Exception as e:
+                logger.error(e)
+
+        else:
+            try:
+                await self.save_db()
+            except Exception as e:
+                logger.error(e)
 
 
 class CgtnToutiaoScrapper(ToutiaoScrapper):
