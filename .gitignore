@@ -2,3 +2,4 @@
 *.json
 *.html
 *.venv/
+*.log

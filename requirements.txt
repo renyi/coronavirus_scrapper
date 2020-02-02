@@ -2,3 +2,9 @@ httpx
 certifi
 beautifulsoup4
 lxml
+aiofile
+orjson
+pyjsparser
+python-dateutil
+uvloop
+python-dotenv
