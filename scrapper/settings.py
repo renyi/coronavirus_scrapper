@@ -23,9 +23,11 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB = os.getenv("DB")
 NEWSAPI_TABLE = os.getenv("NEWSAPI_TABLE")
 
-DEBUG = False
+DEBUG = int(os.getenv("DEBUG", 0)) == 1
 
-OFFLINE_MODE = False
+OFFLINE_MODE = int(os.getenv("OFFLINE_MODE", 0)) == 1
+
+TOUTIAO_PAGE = int(os.getenv("TOUTIAO_PAGE", 1))
 
 KEYWORDS = (
     "冠状病毒",
@@ -61,4 +63,8 @@ BOTS = (
     "scrapper.bots.toutiao.PeopleDailyOverseasToutiaoScrapper",
 )
 
-TOUTIAO_PAGE = 5
+try:
+    # Override settings here
+    from .local_settings import *  # noqa
+except ImportError:
+    pass
