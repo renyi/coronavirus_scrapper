@@ -208,13 +208,13 @@ class ToutiaoScrapper(Scapper, abc.ABC):
             try:
                 await self.save_file()
             except Exception as e:
-                logger.error(e)
+                logger.error(f"{self}: {e}")
 
         else:
             try:
                 await self.save_db()
             except Exception as e:
-                logger.error(e)
+                logger.error(f"{self}: {e}")
 
 
 class CgtnToutiaoScrapper(ToutiaoScrapper):

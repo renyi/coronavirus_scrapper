@@ -36,17 +36,17 @@ class Scapper(abc.ABC):
             if filename is None:
                 filename = f"{self.site_name}-{now}.json"
 
-            logger.debug(f"Saving {filename}")
+            logger.debug(f"{self}: Saving {filename}")
 
             async with aiofile.AIOFile(f"data/{filename}", "w+") as afp:
                 data = orjson.dumps(data)
                 await afp.write(data.decode("utf-8"))
                 await afp.fsync()
 
-            logger.debug(f"Saved.")
+            logger.debug(f"{self}: Saved.")
 
     async def save_db(self):
         if self.data_list:
-            logger.debug(f"Writing to db ..")
+            logger.debug(f"{self}: Writing to db ..")
             await write_db(self.data_list)
-            logger.debug(f"Done.")
+            logger.debug(f"{self}: Done.")
