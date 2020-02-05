@@ -28,6 +28,14 @@ async def get_dbpool():
     return pool
 
 
+async def close_dbpool():
+    global pool
+
+    if pool:
+        pool.close()
+        await pool.wait_closed()
+
+
 async def write_db(data_list: list, commit: bool = False):
     if data_list:
         db_pool = await get_dbpool()

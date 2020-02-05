@@ -8,6 +8,7 @@ import logging.handlers
 
 import scrapper.settings
 import scrapper.utils
+import scrapper.db
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -33,6 +34,8 @@ async def main():
     task_list = [scrapper.utils.import_string(b) for b in scrapper.settings.BOTS]
 
     await asyncio.gather(*[T().run() for T in task_list])
+
+    await scrapper.db.close_dbpool()
 
 
 if __name__ == "__main__":
