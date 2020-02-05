@@ -2,6 +2,8 @@ import abc
 import orjson
 import logging
 import aiofile
+import httpx
+import asyncio
 
 from datetime import datetime
 
@@ -13,6 +15,18 @@ logger = logging.getLogger("scrapper")
 class Scapper(abc.ABC):
     client = None
     data_list = []
+
+    def __str__(self):
+        return self.__class__.__name__
+
+    async def get(self, *args, **kwargs):
+        # Get cookie
+        try:
+            r = await self.client.get(timeout=self.timeout, *args, **kwargs)
+            await asyncio.sleep(1)
+        except (httpx.exceptions.ConnectTimeout, httpx.exceptions.ReadTimeout):
+            return None
+        return r
 
     def find_by_key(self, d, target):
         if isinstance(d, (dict, list, tuple)):
@@ -29,7 +43,7 @@ class Scapper(abc.ABC):
 
     async def save_file(self, filename=None):
         if self.data_list:
-            now = datetime.now().isoformat()
+            now = datetime.utcnow().isoformat()
 
             data = {"data": self.data_list, "timestamp": now}
 

@@ -42,9 +42,6 @@ class ToutiaoScrapper(Scapper, abc.ABC):
         if not self.user_id:
             raise Exception("user_id is not set.")
 
-    def __str__(self):
-        return self.__class__.__name__
-
     def parse_article(self, html_doc: str) -> dict:
         result = {}
 
@@ -108,80 +105,65 @@ class ToutiaoScrapper(Scapper, abc.ABC):
         max_behot_time = 0
         has_more = True
 
-        client = self.client
-
-        # Get cookie
-        await client.get(
-            f"https://www.toutiao.com/c/user/{self.user_id}/", timeout=self.timeout
-        )
+        await self.get(f"https://www.toutiao.com/c/user/{self.user_id}/")
 
         while has_more is True:
             endpoint = f"{self.endpoint}?page_type=1&user_id={self.user_id}&max_behot_time={max_behot_time}"
             logger.info(f"{self}: {endpoint}")
 
             # Get a list of articles
-            try:
-                r = await client.get(endpoint, timeout=self.timeout)
-            except httpx.exceptions.ConnectTimeout:
-                pass
+            r = await self.get(endpoint)
 
             result = None
             if r.status_code == 200:
                 result = r.json()
 
+                task_list = []
                 article_list = result.get("data")
                 for article in article_list:
-                    try:
-                        title = article["title"]
-                        description = article["abstract"]
+                    title = article["title"]
+                    description = article["abstract"]
 
-                        title_lower = title.lower()
-                        description_lower = description.lower()
+                    title_lower = title.lower()
+                    description_lower = description.lower()
 
-                        # Check for keywords
-                        if any(word in title_lower for word in KEYWORDS) or any(
-                            word in description_lower for word in KEYWORDS
-                        ):
-                            article_url = f"{self.root}a{article['item_id']}"
-                            logger.info(f"{self}: {article_url}")
+                    # Check for keywords
+                    if any(word in title_lower for word in KEYWORDS) or any(
+                        word in description_lower for word in KEYWORDS
+                    ):
+                        article_url = f"{self.root}a{article['item_id']}"
+                        logger.info(f"{self}: {article_url}")
+                        task_list.append(self.get(article_url))
 
-                            try:
-                                # Download article
-                                r2 = await client.get(article_url, timeout=self.timeout)
-                            except httpx.exceptions.ConnectTimeout:
-                                pass
+                result_list = await asyncio.gather(*task_list)
 
-                            if r2.status_code == 200:
-                                result2 = r2.text
+                for r2 in result_list:
+                    if r2 and r2.status_code == 200:
+                        result2 = r2.text
 
-                                try:
-                                    parsed = self.parse_article(result2)
-                                except Exception as e:
-                                    logger.error(f"{self}: parse_article: {e}")
+                        try:
+                            parsed = self.parse_article(result2)
+                        except Exception as e:
+                            logger.error(f"{self}: parse_article: {e}")
 
-                                if parsed:
-                                    data = {
-                                        "title": article["title"],
-                                        "description": description,
-                                        "author": self.author,
-                                        "url": article_url,
-                                        "content": parsed.get("content"),
-                                        "urlToImage": article.get("image_url", ""),
-                                        "publishedAt": parsed.get("published").strftime(
-                                            "%Y-%m-%d %H:%M:%S"
-                                        ),
-                                        "addedOn": datetime.now().strftime(
-                                            "%Y-%m-%d %H:%M:%S"
-                                        ),
-                                        "siteName": self.site_name,
-                                        "language": "zh",
-                                    }
-                                    self.data_list.append(data)
-
-                        await asyncio.sleep(1)
-
-                    except Exception as e:
-                        logger.error(f"{self}: {e}")
+                        if parsed:
+                            data = {
+                                "title": article["title"],
+                                "description": description,
+                                "author": self.author,
+                                "url": article_url,
+                                "content": parsed.get("content"),
+                                "urlToImage": article.get("image_url", ""),
+                                "publishedAt": parsed.get("published").strftime(
+                                    "%Y-%m-%d %H:%M:%S"
+                                ),
+                                "addedOn": datetime.utcnow().strftime(
+                                    "%Y-%m-%d %H:%M:%S"
+                                ),
+                                "siteName": self.site_name,
+                                "language": "zh",
+                            }
+                            self.data_list.append(data)
 
             if result:
                 # Pagination
